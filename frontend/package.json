@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "extract-abi": "node scripts/extract-abi.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.12.0",
