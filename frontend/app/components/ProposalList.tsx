@@ -1,17 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
 import { daoContract } from "@/lib/contract";
+import { VoteButtons } from "./VoteButtons";
 
-export function ProposalList() {
-  const { data: proposalCount } = useReadContract({
+export function ProposalList({ refreshKey }: { refreshKey?: number }) {
+  const { data: proposalCount, refetch: refetchCount } = useReadContract({
     ...daoContract,
     functionName: "proposalCount",
   });
 
   const count = proposalCount ? Number(proposalCount) : 0;
 
-  const { data: proposals, isLoading } = useReadContracts({
+  const {
+    data: proposals,
+    isLoading,
+    refetch: refetchProposals,
+  } = useReadContracts({
     contracts: Array.from({ length: count }, (_, i) => ({
       ...daoContract,
       functionName: "proposals" as const,
@@ -19,6 +25,12 @@ export function ProposalList() {
     })),
     query: { enabled: count > 0 },
   });
+
+  useEffect(() => {
+    if (refreshKey === undefined) return;
+    refetchCount();
+    refetchProposals();
+  }, [refreshKey]);
 
   if (count === 0) {
     return <p className="text-sm text-neutral-500">No proposals yet.</p>;
@@ -57,10 +69,18 @@ export function ProposalList() {
               </span>
             </div>
             <p className="text-base mb-3">{description}</p>
-            <div className="flex gap-6 text-xs text-neutral-500">
+            <div className="flex gap-6 text-xs text-neutral-500 mb-3">
               <span>For: {forVotes.toString()}</span>
               <span>Against: {againstVotes.toString()}</span>
             </div>
+            {isOpen && !executed && (
+              <VoteButtons
+                proposalId={id}
+                onVoted={() => {
+                  refetchProposals();
+                }}
+              />
+            )}
           </div>
         );
       })}
