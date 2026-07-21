@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import { useReadContract, useReadContracts } from "wagmi";
 import { daoContract } from "@/lib/contract";
 import { VoteButtons } from "./VoteButtons";
+import { AISummary } from "./AISummary";
+import { ExecuteButton } from "./ExecuteButton";
 
 export function ProposalList({ refreshKey }: { refreshKey?: number }) {
   const { data: proposalCount, refetch: refetchCount } = useReadContract({
@@ -77,6 +79,15 @@ export function ProposalList({ refreshKey }: { refreshKey?: number }) {
               <VoteButtons
                 proposalId={id}
                 onVoted={() => {
+                  refetchProposals();
+                }}
+              />
+            )}
+            <AISummary description={description} />
+            {!isOpen && !executed && (
+              <ExecuteButton
+                proposalId={id}
+                onExecuted={() => {
                   refetchProposals();
                 }}
               />
